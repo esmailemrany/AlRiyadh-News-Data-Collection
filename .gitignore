@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data files - keep large datasets out of Git
+data/raw/
+data/processed/
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+
+# Environment
+.env
+.venv/
+venv/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Google Colab
+.drive/
