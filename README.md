@@ -2,15 +2,7 @@
 
 A Distributed Python Pipeline for Collecting Structured Arabic News Data
 
-<p>
-  <img src="https://img.shields.io/badge/Python-3.x-blue?logo=python" />
-  <img src="https://img.shields.io/badge/BeautifulSoup-HTML%20Parsing-green" />
-  <img src="https://img.shields.io/badge/Pandas-Data%20Processing-150458?logo=pandas" />
-  <img src="https://img.shields.io/badge/Jupyter-Notebooks-orange?logo=jupyter" />
-  <img src="https://img.shields.io/badge/Collection-900K%20Reported%20Records-success" />
-</p>An end-to-end data collection engineering project focused on large-scale Arabic news metadata extraction, workload distribution, and structured dataset preparation.
-
-</div>---
+ 
 
 1. Project Overview
 
