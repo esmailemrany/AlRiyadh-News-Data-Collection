@@ -1,35 +1,79 @@
-<div align="center">Al Riyadh News — Large-Scale Data Collection
+<div align="center">Al Riyadh News
+
+Large-Scale Data Collection
 
 A Distributed Python Pipeline for Collecting Structured Arabic News Data
 
- 
+<br><img src="https://img.shields.io/badge/Python-3.x-blue?logo=python" alt="Python">
+<img src="https://img.shields.io/badge/BeautifulSoup-HTML%20Parsing-green" alt="BeautifulSoup">
+<img src="https://img.shields.io/badge/Pandas-Data%20Processing-150458?logo=pandas" alt="Pandas">
+<img src="https://img.shields.io/badge/Jupyter-Notebooks-orange?logo=jupyter">
+<img src="https://img.shields.io/badge/Collection-~900K%20Records-success"><br><br>
+
+Designed to explore large-scale Arabic news collection through workload distribution, concurrent processing, and structured data extraction.
+
+</div>---
+
+📌 Table of Contents
+
+1. "Project Overview" (#1-project-overview)
+2. "The Engineering Problem" (#2-the-engineering-problem)
+3. "Why Al Riyadh?" (#3-why-al-riyadh)
+4. "Architecture and Workload Distribution" (#4-architecture-and-workload-distribution)
+5. "Data Schema" (#5-data-schema)
+6. "Technologies and Tools" (#6-technologies-and-tools)
+7. "Reliability and Collection Mechanisms" (#7-reliability-and-collection-mechanisms)
+8. "Dataset and Collection Results" (#8-dataset-and-collection-results)
+9. "Repository Structure" (#9-repository-structure)
+10. "Project Screenshots" (#10-project-screenshots)
+11. "Getting Started" (#11-getting-started)
+12. "Limitations and Future Improvements" (#12-limitations-and-future-improvements)
+13. "What This Project Demonstrates" (#13-what-this-project-demonstrates)
+14. "Disclaimer" (#14-disclaimer)
+
+---
 
 1. Project Overview
 
 Collecting hundreds of thousands of web pages is not simply a matter of sending HTTP requests and parsing HTML.
 
-At this scale, the process introduces engineering challenges involving workload organization, network reliability, execution time, failure handling, and data preservation.
+At this scale, the process introduces engineering challenges involving:
 
-This project addresses these challenges by implementing a Python-based news data collection pipeline targeting Al Riyadh, a Saudi Arabian newspaper.
+- Workload organization and distribution.
+- Network reliability and request failures.
+- Execution time and resource management.
+- Data preservation during long-running operations.
+- Consistent data extraction across multiple collection tasks.
 
-The collection workflow was divided into five independent Jupyter notebooks, each responsible for a dedicated article identifier range. These notebooks were executed through five separate Google Colab sessions to distribute the overall workload.
+This project addresses these challenges through a Python-based news data collection pipeline targeting Al Riyadh, a Saudi Arabian newspaper.
 
-The project explores how a large collection task can be organized into manageable, independently executable workloads while maintaining a consistent data extraction structure.
+The collection workflow was divided into five independent Jupyter notebooks, each responsible for a dedicated article identifier range.
+
+These notebooks were executed through five separate Google Colab sessions to distribute the overall workload.
+
+The objective was to develop an organized collection workflow capable of processing a large number of article identifiers while maintaining a consistent data structure.
+
+---
 
 2. The Engineering Problem
 
-A basic web scraping script may work well when collecting a small number of pages. However, scaling the process introduces several difficulties:
+A basic web scraping script may work well when collecting a small number of pages. However, scaling the process introduces several difficulties.
 
-- Execution Time: Processing a large number of pages sequentially can take considerable time.
-- Network Reliability: Requests may fail because of timeouts, temporary server errors, or connectivity interruptions.
-- Workload Management: Large identifier ranges need to be organized and distributed.
-- Data Preservation: Long-running sessions may be interrupted before the entire collection is completed.
-- Data Consistency: Extracted fields must follow a consistent structure across different collection tasks.
-- Operational Monitoring: Progress and collection status need to be observable.
+Challenge| Description
+Execution Time| Processing large numbers of pages sequentially can take considerable time.
+Network Reliability| Requests may fail because of timeouts, temporary server errors, or connectivity interruptions.
+Workload Management| Large identifier ranges need to be organized and distributed.
+Data Preservation| Long-running sessions may be interrupted before collection is completed.
+Data Consistency| Extracted fields must follow a consistent structure across different tasks.
+Operational Monitoring| Progress and collection status need to be observable.
 
 Main Engineering Question
 
-How can a large-scale Arabic news collection process be organized into independent workloads while supporting concurrent requests, failure handling, and incremental data preservation?
+«How can a large-scale Arabic news collection process be organized into independent workloads while supporting concurrent requests, failure handling, and incremental data preservation?»
+
+This question guided the design of the collection workflow.
+
+---
 
 3. Why Al Riyadh?
 
@@ -37,7 +81,7 @@ The project uses "Al Riyadh" (https://www.alriyadh.com/) as its data source.
 
 The selection was based on the website's relevance to Arabic news data collection and its editorial structure.
 
-The website provides:
+The website provides several characteristics useful for this project:
 
 - Arabic-language news articles.
 - Multiple editorial categories.
@@ -47,7 +91,9 @@ The website provides:
 
 These characteristics make it a useful case study for building a structured Arabic news metadata collection workflow.
 
-The project focuses on collecting structured metadata rather than reproducing the newspaper's complete editorial content.
+Collection Focus: The project focuses on structured article metadata rather than reproducing the newspaper's complete editorial content.
+
+---
 
 4. Architecture and Workload Distribution
 
@@ -55,7 +101,9 @@ Instead of relying on one large collection task, the workload was divided into f
 
 Each notebook was assigned a separate article identifier range.
 
-Collection Part| Notebook| Start ID| End ID
+Collection Distribution
+
+Part| Notebook| Start ID| End ID
 01| "scrapping_900k_part_1.ipynb"| 100,000| 309,999
 02| "scrapping_900k_part_2.ipynb"| 310,000| 519,999
 03| "scrapping_900k_part_3.ipynb"| 520,000| 729,999
@@ -74,43 +122,45 @@ This approach was selected to:
 4. Make individual collection tasks easier to restart.
 5. Organize the collection process into manageable units.
 
-Important distinction: The five-session design distributes the overall workload. "ThreadPoolExecutor" is also used in the collection workflow for concurrent request processing. These are two separate levels of execution organization.
+Important: The five-session design distributes the overall workload. "ThreadPoolExecutor" is also used in the collection workflow for concurrent request processing. These are two separate levels of execution organization.
 
 Collection Workflow
 
-             Al Riyadh Website
-                     |
-                     v
-             Article ID Ranges
-                     |
-          +----------+----------+
-          |          |          |
-          v          v          v
-       Part 01    Part 02    Part 03
-          |          |          |
-       Colab 1    Colab 2    Colab 3
+                  Al Riyadh Website
+                         |
+                         v
+                 Article ID Ranges
+                         |
+              +----------+----------+
+              |          |          |
+              v          v          v
+           Part 01    Part 02    Part 03
+              |          |          |
+           Colab 1    Colab 2    Colab 3
 
-          +----------+----------+
-          |                     |
-          v                     v
-       Part 04                Part 05
-          |                     |
-       Colab 4                Colab 5
-          |                     |
-          +----------+----------+
-                     |
-                     v
-             Structured Records
-                     |
-                     v
-              Batch Data Saving
-                     |
-                     v
-              Dataset Preparation
+              +----------+----------+
+              |                     |
+              v                     v
+           Part 04                Part 05
+              |                     |
+           Colab 4                Colab 5
+              |                     |
+              +----------+----------+
+                         |
+                         v
+                 Structured Records
+                         |
+                         v
+                  Batch Data Saving
+                         |
+                         v
+                 Dataset Preparation
+
+---
 
 5. Data Schema
 
-The collection workflow extracts the following structured fields:
+The collection workflow extracts five structured fields.
 
 Field| Description
 "url"| Original article URL
@@ -123,47 +173,55 @@ The extracted fields provide a structured representation of the collected news m
 
 This structure can support subsequent data cleaning, exploratory data analysis, visualization, and Arabic NLP experiments.
 
+---
+
 6. Technologies and Tools
+
+The project combines Python-based web collection, HTML parsing, and structured data processing.
 
 Technology| Role
 Python| Main implementation language
 Requests| HTTP requests and page retrieval
-BeautifulSoup| HTML parsing and extraction
+BeautifulSoup| HTML parsing and information extraction
 lxml| HTML parsing support
 Pandas| Structured data processing
 ThreadPoolExecutor| Concurrent request processing
 Jupyter Notebook| Collection workflow implementation
 Google Colab| Cloud-based execution environment
 
+---
+
 7. Reliability and Collection Mechanisms
 
 The implementation incorporates several mechanisms to make long-running collection tasks more manageable.
 
-Request Handling
+7.1 Request Handling
 
 Uses HTTP requests to retrieve article pages.
 
-Retry Mechanism
+7.2 Retry Mechanism
 
 Supports retrying requests after temporary failures.
 
-Concurrent Processing
+7.3 Concurrent Processing
 
 Uses "ThreadPoolExecutor" to process multiple requests concurrently within the collection workflow.
 
-Progress Tracking
+7.4 Progress Tracking
 
 Provides progress visibility during long-running execution.
 
-Batch Saving
+7.5 Batch Saving
 
 Saves collected records in batches instead of relying only on one final output operation.
 
-Emergency Saving
+7.6 Emergency Saving
 
 Includes a mechanism intended to preserve collected records if execution is interrupted.
 
 These mechanisms help organize the workflow, but they do not guarantee that every identifier corresponds to an accessible article or that every request succeeds.
+
+---
 
 8. Dataset and Collection Results
 
@@ -182,13 +240,15 @@ Sample Dataset
 
 A sample containing 5,000 records is included in:
 
-"data/sample/sample of data.csv"
+data/sample/sample of data.csv
 
 The sample provides a smaller representation of the collected dataset for inspection and schema understanding.
 
 The full collection output is not included in this repository.
 
-Data rights: The original articles and other website content remain the property of their respective rights holders. The sample should contain only information that may lawfully be redistributed. This project does not claim ownership of the newspaper's content.
+Data Rights: The original articles and other website content remain the property of their respective rights holders. The sample should contain only information that may lawfully be redistributed. This project does not claim ownership of the newspaper's content.
+
+---
 
 9. Repository Structure
 
@@ -197,8 +257,8 @@ AlRiyadh-News-Data-Collection/
 ├── assets/
 │   ├── screenshot-01.png
 │   ├── screenshot-02.png
-│   ├── screenshot-03.png
- 
+│   └── screenshot-03.png
+│
 ├── data/
 │   └── sample/
 │       ├── sample of data.csv
@@ -216,29 +276,26 @@ AlRiyadh-News-Data-Collection/
 ├── README.md
 └── requirements.txt
 
+---
+
 10. Project Screenshots
 
 The following screenshots showcase selected stages of the data collection workflow and project execution.
 
-<div align="center"><table>
-<tr>
-<td align="center">
-<img src="assets/screenshot-01.png" width="100%" />
-<br/>
-<strong>Screenshot 01</strong>
-</td>
-<td align="center">
-<img src="assets/screenshot-02.png" width="100%" />
-<br/>
-<strong>Screenshot 02</strong>
-</td>
-<td align="center">
-<img src="assets/screenshot-03.png" width="100%" />
-<br/>
-<strong>Screenshot 03</strong>
-</td>
-</tr>
-</table></div>
+<div align="center">Collection Screenshot 01
+
+<img src="assets/screenshot-01.png" width="95%" alt="Project Screenshot 1"/><br/><br/>
+
+Collection Screenshot 02
+
+<img src="assets/screenshot-02.png" width="95%" alt="Project Screenshot 2"/><br/><br/>
+
+Collection Screenshot 03
+
+<img src="assets/screenshot-03.png" width="95%" alt="Project Screenshot 3"/></div>---
+
+11. Getting Started
+
 Requirements
 
 - Python 3.x
@@ -248,9 +305,15 @@ Requirements
 
 Installation
 
+Clone the repository:
+
 git clone https://github.com/esmailemrany/AlRiyadh-News-Data-Collection.git
 
+Navigate to the project directory:
+
 cd AlRiyadh-News-Data-Collection
+
+Install the required dependencies:
 
 pip install -r requirements.txt
 
@@ -266,11 +329,17 @@ The notebooks were originally designed for Google Colab. Environment-specific pa
 
 Responsible Collection
 
-Before running the collection workflow, review the target website's terms and access policies. Use reasonable request rates and avoid placing unnecessary load on the website.
+Before running the collection workflow, review the target website's terms and access policies.
+
+Use reasonable request rates and avoid placing unnecessary load on the website.
+
+---
 
 12. Limitations and Future Improvements
 
-The current implementation provides a foundation for large-scale Arabic news metadata collection. The following improvements could strengthen it further.
+The current implementation provides a foundation for large-scale Arabic news metadata collection.
+
+The following improvements could strengthen the project further.
 
 Data Quality
 
@@ -303,7 +372,9 @@ Analytics and AI
 - Geographical coverage analysis where supported by the data.
 - Arabic NLP applications.
 
-These items are proposed future improvements, not claims about features already implemented.
+These are proposed future improvements, not claims about features already implemented.
+
+---
 
 13. What This Project Demonstrates
 
@@ -319,7 +390,9 @@ This project demonstrates practical experience with:
 - Long-running notebook workflows.
 - Structured dataset preparation.
 
-It also establishes a foundation for further exploration in data engineering, data analytics, and Arabic natural language processing.
+It also establishes a foundation for further exploration in Data Engineering, Data Analytics, and Arabic Natural Language Processing.
+
+---
 
 14. Disclaimer
 
@@ -327,7 +400,9 @@ This is an independent educational and technical project.
 
 It is not affiliated with, sponsored by, or officially associated with Al Riyadh newspaper.
 
-All website content and intellectual property remain the property of their respective rights holders. The project must be used responsibly and in accordance with applicable website policies and laws.
+All website content and intellectual property remain the property of their respective rights holders.
+
+The project must be used responsibly and in accordance with applicable website policies and laws.
 
 ---
 
@@ -339,6 +414,6 @@ AI & Data Science Student
 
 "GitHub Profile" (https://github.com/esmailemrany)
 
-<br/>Building structured data collection workflows for real-world data engineering challenges.
+<br>Building structured data collection workflows for real-world data engineering challenges.
 
 </div>
